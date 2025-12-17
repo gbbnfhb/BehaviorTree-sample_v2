@@ -132,6 +132,7 @@
     <ClCompile Include="treeView.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ai_tree.lua" />
     <None Include="scripts\find_random_location.lua" />
     <None Include="scripts\is_enemy_close.lua" />
     <None Include="scripts\move_to_enemy.lua" />
@@ -141,8 +142,10 @@
     <ClInclude Include="bt.h" />
     <ClInclude Include="CompositeNode.h" />
     <ClInclude Include="DecoratorNode.h" />
+    <ClInclude Include="FailerNode.h" />
     <ClInclude Include="leafNode.h" />
     <ClInclude Include="node.h" />
+    <ClInclude Include="ParallelNode.h" />
     <ClInclude Include="Repeater.h" />
     <ClInclude Include="Selector.h" />
     <ClInclude Include="Sequence.h" />

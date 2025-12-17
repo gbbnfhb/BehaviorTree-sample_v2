@@ -27,7 +27,7 @@ end
 
 
 
-
+--[[
 -- このスクリプトは、AIのビヘイビアツリー構造を定義し、それを返す
 
 -- BT.Selector や BT.Sequence は、C++側で登録した関数
@@ -51,6 +51,61 @@ local tree = BT.Repeater("Infinite Loop", -1,
          })
             ),
             BT.Wait("Wait 2s", 2.0)
+        })
+    })
+)
+
+-- 構築したツリーを返す
+return tree
+]]--
+
+
+
+
+---------------------------------------------------------------------
+-- AIの構造定義
+---------------------------------------------------------------------
+
+-- [状態A] 戦闘行動の定義
+-- 敵を発見したら、このシーケンスが実行される
+local combat_behavior = BT.Sequence("Combat Sequence", {
+    BT.SetTargetToOpponent("Set Target to Enemy"),
+    BT.LuaNode("Chase Enemy (Lua)", MoveToTarget)
+    -- 今後、ここに「攻撃する」「距離を取る」などのノードを追加していく
+})
+
+
+-- [状態B] 平時行動の定義
+-- 敵がいない間、このシーケンスが実行される
+-- この行動は一度始まったら、敵に発見されるまで中断されるべきではない
+local peacetime_behavior = BT.Sequence("Peacetime Cycle", {
+    BT.Repeater("Repeat 3 times", 3,
+        BT.Sequence("Wander Once", {
+            BT.SetRandomTarget("Set Random Target"),
+            BT.LuaNode("Move to Random Target (Lua)", MoveToTarget)
+        })
+    ),
+    BT.Wait("Wait 2s", 2.0)
+})
+
+
+-- [最終的な脳] 状態Aと状態Bを切り替える意思決定部分
+local tree = BT.Repeater("Infinite Loop", -1,
+    -- RSelectorを使い、常に敵がいないか最優先でチェックする
+    BT.RSelector("Brain: Combat or Peacetime?", {
+    
+        -- 優先度1: 戦闘状態に入るか？
+        BT.Sequence("Check for Combat Condition", {
+            BT.IsEnemyNear("Is Enemy Near?", 150.0), -- 敵が近くにいるか？
+            combat_behavior -- Yes -> 戦闘行動を実行
+        }),
+        
+        -- 優先度2: 平時状態
+        -- RSelectorの性質で毎フレームリセットされるのを防ぐため、
+        -- Selectorでラップする。これにより、peacetime_behaviorが
+        -- 完了するまで、このブランチは中断されなくなる。
+        BT.Selector("Peacetime Wrapper", {
+            peacetime_behavior
         })
     })
 )

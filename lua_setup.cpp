@@ -31,6 +31,16 @@ void bind_nodes_to_lua(sol::state& lua) {
 		"speed", &Agent::speed
 	);
 
+	lua.new_usertype<FailerNode>("Failer",
+		sol::no_constructor,
+		sol::base_classes, sol::bases<Node>()
+	);
+
+	lua.new_usertype<SuccessNode>("Succeeder",
+		sol::no_constructor,
+		sol::base_classes, sol::bases<Node>()
+	);
+
 	// --- 基本的なノードクラスをLuaに登録 ---
 	// これにより、Lua側でNodeオブジェクトを扱えるようになる
 	lua.new_usertype<Node>("Node", sol::no_constructor);
@@ -46,9 +56,8 @@ void bind_nodes_to_lua(sol::state& lua) {
 	lua.new_usertype<SetTargetToOpponentNode>("SetTargetToOpponentNode", sol::no_constructor, sol::base_classes, sol::bases<Node>());
 	lua.new_usertype<SetRandomTargetNode>("SetRandomTargetNode", sol::no_constructor, sol::base_classes, sol::bases<Node>());
 	lua.new_usertype<MoveNode>("MoveNode", sol::no_constructor, sol::base_classes, sol::bases<Node>());
-
-
-
+	lua.new_usertype<ParallelNode>("Parallel",sol::no_constructor, sol::base_classes, sol::bases<Node, CompositeNode>());
+	lua.new_usertype<InverterNode>("Inverter",sol::no_constructor,	sol::base_classes, sol::bases<Node>());
 
 
 	// --- 各ノードを生成するための「ファクトリ関数」をLuaに公開 ---
@@ -112,7 +121,56 @@ void bind_nodes_to_lua(sol::state& lua) {
 
 	lua["BT"]["Move"] = [](std::string name) -> std::shared_ptr<Node> { // ★
 		return std::static_pointer_cast<Node>(std::make_shared<MoveNode>(name)); // ★
-	};}
+	};
+
+
+	lua["BT"]["Parallel"] = sol::overload(
+		// パターン1: BT.Parallel("Name", "SuccessPolicy", "FailurePolicy", {child1, ...})
+		[](const std::string& name, const std::string& successPolicy, const std::string& failurePolicy, sol::table children_table) -> std::shared_ptr<Node> {
+		std::vector<std::shared_ptr<Node>> children;
+		// Luaのテーブルから子ノードを取り出してベクターに詰める
+		for (const auto& kv : children_table) {
+			children.push_back(kv.second.as<std::shared_ptr<Node>>());
+		}
+		// ParallelNodeを生成し、基底クラスのポインタとして返す
+		return std::static_pointer_cast<Node>(
+			std::make_shared<ParallelNode>(name, successPolicy, failurePolicy, children)
+		);
+	},
+		// パターン2: BT.Parallel("Name", "SuccessPolicy", {child1, ...})
+		// 失敗ポリシーを省略した場合のパターン
+		[](const std::string& name, const std::string& successPolicy, sol::table children_table) -> std::shared_ptr<Node> {
+		std::vector<std::shared_ptr<Node>> children;
+		for (const auto& kv : children_table) {
+			children.push_back(kv.second.as<std::shared_ptr<Node>>());
+		}
+		// 失敗ポリシーのデフォルト値 "RequireOne" をC++側で補う
+		return std::static_pointer_cast<Node>(
+			std::make_shared<ParallelNode>(name, successPolicy, "RequireOne", children)
+		);
+	}
+	);
+
+	lua["BT"]["Failer"] = [](const std::string& name) -> std::shared_ptr<Node> {
+		return std::static_pointer_cast<Node>(
+			std::make_shared<FailerNode>(name)
+		);
+	};
+
+	lua["BT"]["Succeeder"] = [](const std::string& name) -> std::shared_ptr<Node> {
+		return std::static_pointer_cast<Node>(
+			std::make_shared<SuccessNode>(name)
+		);
+	};
+
+	lua["BT"]["Inverter"] = [](const std::string& name, std::shared_ptr<Node> child) -> std::shared_ptr<Node> {
+		return std::static_pointer_cast<Node>(
+			std::make_shared<InverterNode>(name, child)
+		);
+	};
+}
+
+
 
 void lua_setup()
 {

@@ -11,6 +11,11 @@ enum class NodeStatus {
 	RUNNING,
 };
 
+enum class Policy {
+	RequireOne, // 一つでも条件を満たせばOK
+	RequireAll  // 全てが条件を満たす必要がある
+};
+
 // 状態を文字列に変換するヘルパー
 inline const char* StatusToString(NodeStatus status) {
 	switch (status) {
@@ -62,5 +67,7 @@ public:
 #include "Sequence.h"
 #include "Repeater.h"
 #include "WaitNode.h"
+#include "ParallelNode.h"
+#include "FailerNode.h"
 
 #include "leafNode.h"
