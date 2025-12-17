@@ -133,3 +133,8 @@ LuaCoroutineNode(動作未確認、まだAIで書いただけ。おいw)
 
 
 ~~~  
+
+
+
+※おまけ  
+<img width="757" height="833" alt="無題" src="https://github.com/user-attachments/assets/b09059af-6621-4839-ba46-df62ffc25822" />
