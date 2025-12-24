@@ -8,7 +8,7 @@ v2は大幅に機能追加。セレクター、リピーター、ウエイトを
 前回はリーフだけluaだったのが今度はビヘイビアツリーほぼ全体がluaで書けるようになりました。 
   
 ※更新しました。サービスを追加。サービスについてはこちらを参照  
-https://dev.epicgames.com/documentation/ja-jp/unreal-engine/behavior-tree-in-unreal-engine---overview  
+https://dev.epicgames.com/documentation/ja-jp/unreal-engine/behavior-tree-in-unreal-engine---overview#services  
 前回リーフで範囲内か見てたのをサービスでやるように変更しました。もちろんLua対応済  
 いやあ今回はAIがまったく役に立たず苦戦しました。プログラムが横断的になると全然ダメね  
 Antigravityは少しマシだけど、横断するからあっという間に上限に行っちゃうし。  
