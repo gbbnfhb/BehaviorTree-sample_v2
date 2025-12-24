@@ -1,5 +1,6 @@
 #pragma once
 #include "CompositeNode.h"
+#include "Service.h"
 
 // =================================================================================================
 // 2. 具体的なBTノードの実装
@@ -35,6 +36,9 @@ public:
 		running_child_index = -1;
 		return status = NodeStatus::FAILURE;
 	}
+	~Selector() override{
+	}
+
 };
 
 //リアクティブ・セレクターの実装
@@ -47,11 +51,18 @@ public:
 という概念を直接的に実装したものです。 
 */
 class RSelector : public CompositeNode {
+protected:
+
+
 public:
 	RSelector(std::string name, std::vector<std::shared_ptr<Node>> children_nodes) 
 		: CompositeNode(name, std::move(children_nodes)) {}
 
 	NodeStatus tick(Agent& agent, const Agent& opponent) override {
+
+		// このSequenceノードがtickされるたびに、アタッチされたサービスをtickする
+		tickServices(agent); 
+
 		// 毎フレーム、必ず最初の子からチェックする
 		for (size_t i = 0; i < children.size(); ++i) {
 			NodeStatus child_status = children[i]->tick(agent, opponent);
@@ -80,4 +91,8 @@ public:
 		running_child_index = -1;
 		return status = NodeStatus::FAILURE;
 	}
+
+	~RSelector() override{
+	}
+
 };

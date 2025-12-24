@@ -104,6 +104,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\raylib-5.5\src;C:\raygui\src;C:\dev\saba\external;C:\dev\saba\external\lua;C:\dev\saba\external\sol3;C:\BehaviorTree\bt</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,7 +129,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bt.cpp" />
-    <ClCompile Include="lua_setup.cpp" />
+    <ClCompile Include="lua_setup.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="treeView.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -139,16 +142,20 @@
     <None Include="scripts\move_to_target.lua" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Blackboard.h" />
     <ClInclude Include="bt.h" />
     <ClInclude Include="CompositeNode.h" />
     <ClInclude Include="DecoratorNode.h" />
     <ClInclude Include="FailerNode.h" />
     <ClInclude Include="leafNode.h" />
+    <ClInclude Include="LuaCoroutineNode.h" />
+    <ClInclude Include="LuaService.h" />
     <ClInclude Include="node.h" />
     <ClInclude Include="ParallelNode.h" />
     <ClInclude Include="Repeater.h" />
     <ClInclude Include="Selector.h" />
     <ClInclude Include="Sequence.h" />
+    <ClInclude Include="Service.h" />
     <ClInclude Include="SetTargetToOpponentNode.h" />
     <ClInclude Include="TreeNode.h" />
     <ClInclude Include="treeView.h" />

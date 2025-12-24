@@ -8,6 +8,9 @@ public:
 		: CompositeNode(name, std::move(children_nodes)) {}
 
 	NodeStatus tick(Agent& agent, const Agent& opponent) override {
+		// このSequenceノードがtickされるたびに、アタッチされたサービスをtickする
+		tickServices(agent); 
+
 		size_t start_index = (running_child_index != -1) ? running_child_index : 0;
 
 		for (size_t i = start_index; i < children.size(); ++i) {
@@ -25,4 +28,8 @@ public:
 		running_child_index = -1;
 		return status = NodeStatus::SUCCESS;
 	}
+	~Sequence() override{
+	}
+
+
 };

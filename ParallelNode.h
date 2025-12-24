@@ -24,6 +24,8 @@ public:
 		else failurePolicy = Policy::RequireOne;
 	}
 
+	~ParallelNode() override{
+	}
 
 	NodeStatus tick(Agent& agent, const Agent& opponent) override {
 		size_t successCount = 0;
@@ -78,4 +80,5 @@ public:
 		// ã‹L‚ÌŠ®—¹ğŒ‚ğ–‚½‚³‚È‚¯‚ê‚ÎA‚Ü‚¾Às’†
 		return status = NodeStatus::RUNNING;
 	}
+
 };

@@ -1,4 +1,7 @@
 #pragma once
+#include "Service.h"
+#include "Blackboard.h"
+
 // =================================================================================================
 // 1. ビヘイビアツリー (BT) の基本クラス
 // =================================================================================================
@@ -31,7 +34,15 @@ struct Agent {
 	Vector2 position = { 400, 300 };
 	Vector2 targetPosition = { 400, 300 };
 	float speed = 100.0f; // 1秒あたりのピクセル移動量
+	Blackboard bb;
+
+	Blackboard *getBlackboard(){
+		return &bb;
+	}
 };
+
+
+
 
 // 全てのノードの基底クラス
 class Node {
@@ -40,8 +51,10 @@ protected:
 	std::string name;
 
 public:
+	Node(){}
 	Node(std::string name) : name(name) {}
 	virtual ~Node() = default;
+
 
 	virtual NodeStatus tick(Agent& agent, const Agent& opponent) = 0;
 
@@ -58,7 +71,23 @@ public:
 	virtual std::vector<std::shared_ptr<Node>> getChildren() const {
 		return {};
 	}
+
+	// Luaからメソッドチェーンで呼ばれることを想定し、自分自身のポインタを返す版
+	// これにより :AddService(...) のような記述が可能になる
+	Node* addServiceAndReturnSelf(std::shared_ptr<Service> service) {
+		addService( std::move(service) );
+		return this;
+	}
+
+
+	virtual void addService(std::shared_ptr<Service> service){};
+
+	virtual bool checkCondition(Agent& agent) {
+		return false;
+	}
+
 };
+
 
 #include "CompositeNode.h"
 #include "DecoratorNode.h"

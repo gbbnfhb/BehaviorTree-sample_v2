@@ -39,28 +39,7 @@ int main(void) {
 	enemy.position = { -100, -100 }; // 最初は画面外
 
 	// --- ビヘイビアツリーの構築 ---
-#if 0
-	auto _Root = std::make_shared<RSelector>("Root (Reactive)", std::vector<std::shared_ptr<Node>>{
-		// 優先度1: 追跡行動
-		std::make_shared<Sequence>("Chase Sequence", std::vector<std::shared_ptr<Node>>{
-			std::make_shared<IsEnemyNearNode>("Is Enemy Near?", 150.0f),
-				std::make_shared<SetTargetToOpponentNode>("Set Target to Enemy"),
-				std::make_shared<MoveNode>("Chase Enemy")
-		}),
 
-			// 優先度2: 普段の徘徊サイクル
-			std::make_shared<Sequence>("Wander & Wait Cycle", std::vector<std::shared_ptr<Node>>{
-			std::make_shared<Repeater>("Repeat 3 times", 3,
-				std::make_shared<Sequence>("Wander Once", std::vector<std::shared_ptr<Node>>{
-				std::make_shared<SetRandomTargetNode>("Set Random Target"),
-					std::make_shared<MoveNode>("Move to Target")
-			})
-			),
-				std::make_shared<WaitNode>("Wait 2s", 2.0f)
-		})
-	});
-	auto behaviorTreeRoot = std::make_shared<Repeater>("Infinite Loop", -1, _Root);// -1で無限ループ
-#else
 	sol::protected_function_result result = Lua.script_file("ai_tree.lua");
 
 	std::shared_ptr<Node> behaviorTreeRoot;
@@ -75,7 +54,7 @@ int main(void) {
 		// エラー処理：とりあえずダミーのノードをルートにしておくなど
 		behaviorTreeRoot = std::make_shared<WaitNode>("Error Dummy", 999.0f);
 	}
-#endif
+
 
 	// --- GUIツリーの初期化 ---
 	TreeNode guiRoot(behaviorTreeRoot);

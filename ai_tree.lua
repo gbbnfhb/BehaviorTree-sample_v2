@@ -26,39 +26,27 @@ local function MoveToTarget(agent, opponent)
 end
 
 
-
---[[
--- このスクリプトは、AIのビヘイビアツリー構造を定義し、それを返す
-
--- BT.Selector や BT.Sequence は、C++側で登録した関数
-local tree = BT.Repeater("Infinite Loop", -1,
-    BT.RSelector("Root (Reactive)", {
-        -- 優先度1: 追跡行動
-        BT.Sequence("Chase Sequence", {
-            BT.IsEnemyNear("Is Enemy Near?", 150.0),
-            BT.SetTargetToOpponent("Set Target to Enemy"),
---            BT.Move("Chase Enemy")
-			BT.LuaNode("Chase Enemy (Lua)", MoveToTarget)
-        }),
-
-        -- 優先度2: 普段の徘徊サイクル
-        BT.Sequence("Wander & Wait Cycle", {
-            BT.Repeater("Repeat 3 times", 3,
-                BT.Sequence("Wander Once", {
-                    BT.SetRandomTarget("Set Random Target"),
---                    BT.Move("Move to Target")
-					BT.LuaNode("Chase Enemy (Lua)", MoveToTarget)
-         })
-            ),
-            BT.Wait("Wait 2s", 2.0)
-        })
-    })
-)
-
--- 構築したツリーを返す
-return tree
-]]--
-
+-- プレイヤーが視界内にいるかチェックし、ブラックボードを更新するサービス
+local function CheckPlayerVisibility(agent)
+    -- ブラックボードからopponentの情報を取得する
+    -- C++側でポインタをバインドしていると仮定
+    --local opponent = agent.blackboard:GetUserData("Opponent") 
+	
+    -- ここでは簡易的に、相手(opponent)との距離で代用
+--    local dx = agent.position.x - opponent.position.x
+--    local dy = agent.position.y - opponent.position.y
+    local dx = agent.targetPosition.x - agent.position.x
+    local dy = agent.targetPosition.y - agent.position.y
+    local dist = math.sqrt(dx*dx + dy*dy)
+    
+    local player_is_visible = (dist < 150.0)
+    
+    -- ブラックボードに結果を書き込む
+    agent.blackboard:SetBool("IsEnemyNear", player_is_visible)
+    
+    -- デバッグ出力
+    --print("Service: IsEnemyNear = " .. tostring(player_is_visible))
+end
 
 
 
@@ -95,11 +83,17 @@ local tree = BT.Repeater("Infinite Loop", -1,
     BT.RSelector("Brain: Combat or Peacetime?", {
     
         -- 優先度1: 戦闘状態に入るか？
+--[[
         BT.Sequence("Check for Combat Condition", {
             BT.IsEnemyNear("Is Enemy Near?", 150.0), -- 敵が近くにいるか？
             combat_behavior -- Yes -> 戦闘行動を実行
         }),
-        
+]]--
+        BT.IsTrue("IsEnemyNear", 
+            combat_behavior 
+        ),
+
+
         -- 優先度2: 平時状態
         -- RSelectorの性質で毎フレームリセットされるのを防ぐため、
         -- Selectorでラップする。これにより、peacetime_behaviorが
@@ -108,6 +102,13 @@ local tree = BT.Repeater("Infinite Loop", -1,
             peacetime_behavior
         })
     })
+
+    -- ★★★ ここが新しい部分 ★★★
+    -- メソッドチェーンで、RSelectorノードにサービスを追加する
+    :AddService(
+        -- 0.2秒間隔で CheckPlayerVisibility 関数を実行するサービスを定義
+        BT.Service("Enemy Search Service", 2.0, CheckPlayerVisibility)
+    )
 )
 
 -- 構築したツリーを返す

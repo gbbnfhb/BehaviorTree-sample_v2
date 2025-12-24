@@ -1,5 +1,6 @@
 #pragma once
 #include "node.h"
+#include "raymath.h"
 
 // --- 具体的な行動ノード (Leaf Node) ---
 

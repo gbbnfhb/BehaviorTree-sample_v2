@@ -1,6 +1,6 @@
 #pragma once
 #include <utility> // std::forward のために必要
-#include"Blackboard.h"
+//#include"Blackboard.h"
 // --- 前方宣言 ---
 class Agent;
 
@@ -39,14 +39,7 @@ public:
 		// LeafNodeなど、子を持たないノードは空のベクターを返す
 		return {};
 	}
-/*
-	// 子ノードのリストを返す (BranchNode用)
-	virtual const std::vector<std::shared_ptr<Node>>& getChildren() const {
-		// BranchNode以外は空のリストを返す
-		static const std::vector<std::shared_ptr<Node>> empty;
-		return empty;
-	}
-*/
+
 };
 
 class BranchNode : public Node {
@@ -71,11 +64,7 @@ public:
 			child->gui_status_reset();
 		}
 	}
-/*
-	virtual std::string getStatusText() const {
-		return "BranchNode: " + StatusToString(gui_status);
-	}
-*/
+
 	virtual std::string getBranchTypeName() const = 0;
 
 	// getStatusTextはBranchNodeで実装してしまう
@@ -108,13 +97,7 @@ public:
 	std::string getBranchTypeName() const override {
 		return "Sequence";
 	}
-/*
-	virtual std::string getDebugText() const {
-		return "Sequence: " + StatusToString(gui_status);
-	}
 
-	std::string getStatusText() const override { return "Sequence: " + StatusToString(gui_status); }
-*/
 };
 
 class Selector : public BranchNode {
@@ -245,10 +228,5 @@ public:
 		}
 		return node_name + ": " + StatusToString(gui_status);
 	}
-/*
-	std::string getStatusText() const override {
-		// class_nameはコンストラクタで保存しておく
-		return "Lua: " + class_name + " -> " + StatusToString(gui_status);
-	}
-*/
+
 };
